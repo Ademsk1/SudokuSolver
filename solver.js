@@ -34,6 +34,10 @@ function getBox(board,i,j) {
     return boxCoordinates.map(crd=>board[crd[0]][crd[1]])
 }
 
+function removeEmpties(array) {
+    return array.filter(el=> typeof el==='number' && el!==0)
+}
+
 function cellsPossibleValues(board,i,j) {
     const allInvalidValues = [...getBox(board,i,j),...getColumn(board,j),...getRow(board,i)]
     const invalidValues = Array.from(new Set(removeEmpties(allInvalidValues)))
@@ -96,7 +100,7 @@ function findEmptyCells(board) {
 function sudokuSolver(board) {
     let currentBox
     const startTime = new Date()
-    let emptyCellIndexes = findEmptyCells(board) 
+    let emptyCellIndexes
     let unsolved = true
 
     while (unsolved) {
@@ -122,10 +126,10 @@ function sudokuSolver(board) {
             console.log(`dT = ${new Date() - startTime}`)
             unsolved=false
         }
-        console.log(`-------------`)
-        console.log(board)
+        // console.log(`-------------`)
+        // console.log(board)
     }
-    console.log(board)
+    return board
 
 
 
@@ -158,4 +162,12 @@ const evil = [[5,0,0,0,0,0,1,0,2],
               [0,0,3,6,0,0,0,1,0],
               [0,6,0,0,3,1,0,8,0],
               [2,0,9,0,0,0,0,0,6]]
-sudokuSolver(evil)
+sudokuSolver(medium)
+
+
+module.exports = {
+    cellsPossibleValues,
+    eliminatePossibility,
+    eliminateBoxPossibles,
+    sudokuSolver,
+}
