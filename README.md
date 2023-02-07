@@ -1,6 +1,16 @@
 # Sudoku Solver
 ## Introduction
-This is a Javascript program written to solve Sudoku puzzles. There are no pre-requisites provided your runtime is up to date. 
+This is a Javascript program written to solve Sudoku puzzles.
+
+## Getting started
+
+To run this, you'll need to install the node runtime and jest as a testing framework.
+
+
+1. Initialise node runtime with `npm init -y`
+2. Change the package.json file "test" key value to "jest"
+3. Install jest using `npm install --save-dev jest`
+4. Run with `node solver.js`, test with `npm test`
 
 ---
 
