@@ -29,6 +29,8 @@ Two methods of insertion occurs at this current stage (07/02/2023)
 
 This list is currently incomplete, and the following is hoping to be achieved in the near future:
 
+### Methods
+
 1. Apply (2) from above to not only boxes, but rows and columns. 
 2.  **Obvious Pairs/Obvious Triples**
 3. **Hidden Pairs/Hidden Triples**
@@ -41,3 +43,10 @@ Further solving methodologies hope to implemented, but before this, I hope to ac
 
 Once the above is completed, and an assessment is made on the abilities of the script should advanced solving methods be applied. 
 
+## Efficiency
+
+While efficiency has not been assessed directly, the 8 tests that have occured all took approximately 5ms to complete, and were easy/medium problems.
+
+## Issues
+
+There is a current issue in the script in deciding when to apply method (2) that will be resolved, although this is more of an efficiency issue than a bug.
