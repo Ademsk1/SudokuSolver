@@ -36,6 +36,7 @@ test('Cells possible values are read correctly',()=> {
     cell10P = [1,4,6]
     cell55P = [2,4,8]
     cell87P = [3,4,5,7]
+    console.log('hi')
     expect(cpv(evil,1,0).sort()).toStrictEqual(cell10P)
     expect(cpv(evil,5,5).sort()).toStrictEqual(cell55P)
     expect(cpv(evil,8,7).sort()).toStrictEqual(cell87P)
@@ -47,5 +48,5 @@ test('Solution is found for medium and is correct',()=> {
 })
 
 test('Possibilities on rows/cols/boxes eliminated',()=> {
-    
+
 })
