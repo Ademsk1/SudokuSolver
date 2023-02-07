@@ -1,0 +1,23 @@
+{
+  "name": "sudokusolver",
+  "version": "1.0.0",
+  "description": "This is a Javascript program written to solve Sudoku puzzles. There are no pre-requisites provided your runtime is up to date.",
+  "main": "solver.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ademsk1/SudokuSolver.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ademsk1/SudokuSolver/issues"
+  },
+  "homepage": "https://github.com/Ademsk1/SudokuSolver#readme",
+  "devDependencies": {
+    "jest": "^29.4.2"
+  }
+}
