@@ -34,6 +34,8 @@ function getBox(board,i,j) {
     return boxCoordinates.map(crd=>board[crd[0]][crd[1]])
 }
 
+
+
 function removeEmpties(array) {
     return array.filter(el=> typeof el==='number' && el!==0)
 }
@@ -87,6 +89,7 @@ function eliminateBoxPossibles(board,i,j) {
 
 function findEmptyCells(board) {
     const emptyCellIndexes = []    
+    let currentBox = 0
     board.forEach((row,i)=> {
         row.forEach((cell,j)=> {
             if (cell===0 || typeof cell==='object') {
@@ -112,16 +115,18 @@ function sudokuSolver(board) {
             if (typeof board[i][j]==='number') {
                 eliminatePossibility(board[i][j],i,j,board)
             }
-            const singularSols = eliminateBoxPossibles(board,i,j)
-            if ([3,6,9].includes(i+1) && [3,6,9].includes(j+1)) {
+        }
+        for (let i=0;i<=6;i+=3) {
+            for (let j=0;j<=6;j+=3) {
                 const singularSols = eliminateBoxPossibles(board,i,j)
                 for (sol of singularSols) {
                     const [value,[crdI,crdJ]] = sol
                     board[crdI][crdJ] = value
                     eliminatePossibility(value,crdI,crdJ,board)
                 }
-            }
         }
+    }
+        
         if (emptyCellIndexes.length===0) {
             console.log(`dT = ${new Date() - startTime}`)
             unsolved=false
