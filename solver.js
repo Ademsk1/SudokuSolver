@@ -1,3 +1,5 @@
+const { objectExpression } = require("@babel/types")
+
 function getRow(board,i) {
     return board[i]
 }
@@ -67,16 +69,15 @@ function eliminatePossibility(value,i,j,board) {
     })
 }
 
-function eliminateBoxPossibles(board,i,j) {
-    const allBoxPossiblesCrds = getBoxCoordinates(i,j).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
-    const allBoxPossibles = allBoxPossiblesCrds.map(crd=> board[crd[0]][crd[1]])
+function obviousSingles(board,i,j,type) {
+    const coordinates = findEmptyCellCoordinates(board,i,j,type)
+    const possibleValues = coordinates.map(crd=> board[crd[0]][crd[1]])
     const valueCounter = {}
-    allBoxPossibles.forEach((possibles,crdCounter)=> {
+    possibleValues.forEach((possibles,crdCounter)=> {
         possibles.forEach(possible=> {
-            `${possible}` in valueCounter? valueCounter[`${possible}`][0]++:valueCounter[`${possible}`]=[1,allBoxPossiblesCrds[crdCounter]]
+            `${possible}` in valueCounter? valueCounter[`${possible}`][0]++:valueCounter[`${possible}`]=[1,coordinates[crdCounter]]
         })
     })
-    //console.log(valueCounter)
     const singularCells = Object.keys(valueCounter).reduce((acc,key)=> {
         if (valueCounter[key][0]===1 ){
             acc.push([parseInt(key),valueCounter[key][1]])
@@ -86,8 +87,19 @@ function eliminateBoxPossibles(board,i,j) {
     return singularCells
 }
 
+function findEmptyCellCoordinates(board,i,j,type) {
+    if (type==='row') {
+        return getRowCoordinates(i).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+    }
+    else if (type==='box') {
+        return  getBoxCoordinates(i,j).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+    }
+    else {
+        return getColumnCoordinates(j).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+    }
+}
 
-function findEmptyCells(board) {
+function findAllEmptyCells(board) {
     const emptyCellIndexes = []    
     let currentBox = 0
     board.forEach((row,i)=> {
@@ -105,9 +117,9 @@ function sudokuSolver(board) {
     const startTime = new Date()
     let emptyCellIndexes
     let unsolved = true
-
+    let I,J
     while (unsolved) {
-        emptyCellIndexes = findEmptyCells(board)
+        emptyCellIndexes = findAllEmptyCells(board)
         for (let emptyCell of emptyCellIndexes) {
             const [i,j] = emptyCell
 
@@ -116,25 +128,26 @@ function sudokuSolver(board) {
                 eliminatePossibility(board[i][j],i,j,board)
             }
         }
-        for (let i=0;i<=6;i+=3) {
-            for (let j=0;j<=6;j+=3) {
-                const singularSols = eliminateBoxPossibles(board,i,j)
-                for (sol of singularSols) {
-                    const [value,[crdI,crdJ]] = sol
-                    board[crdI][crdJ] = value
+        for (let k=0;k<9;k++) {
+            I = Math.floor(k/3)*3
+            J = (k % 3)*3
+            const boxSols = obviousSingles(board,I,J,'box')
+            const rowSols = obviousSingles(board,k,k,'row')
+            const colSols =  obviousSingles(board,k,k,'column')
+            for (let [value,[crdI,crdJ]] of [...rowSols,...colSols,...boxSols]) {
+                if (typeof board[crdI][crdJ]!=='number') {
+                    board[crdI][crdJ]=value
                     eliminatePossibility(value,crdI,crdJ,board)
                 }
+            }
         }
-    }
-        
         if (emptyCellIndexes.length===0) {
             console.log(`dT = ${new Date() - startTime}`)
             unsolved=false
         }
-        // console.log(`-------------`)
-        // console.log(board)
     }
     return board
+
 
 
 
@@ -173,6 +186,6 @@ sudokuSolver(medium)
 module.exports = {
     cellsPossibleValues,
     eliminatePossibility,
-    eliminateBoxPossibles,
+    obviousSingles,
     sudokuSolver,
 }
