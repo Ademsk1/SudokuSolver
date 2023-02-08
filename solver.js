@@ -41,28 +41,62 @@ function getBox(board,i,j) {
 function removeEmpties(array) {
     return array.filter(el=> typeof el==='number' && el!==0)
 }
+function obviousPairs(board,i,j,type) {
+    const coordinates = findEmptyCellCoordinates(board,i,j,type)
+    const possibleValues = coordinates.map((crd,crd_i)=> [board[crd[0]][crd[1]],crd]) 
+    const possiblePairs = possibleValues.filter(values=>values[0].length===2).map(el=> el[0]=`${el[0]}`)
+    const matchingCells = []
+    let value1,value2
+    for (let l=0;l<possiblePairs.length;l++) {
+        for (let k=l+1;k<possiblePairs.length;k++) {
+            if (possiblePairs[l][0]===possiblePairs[k][0]) {
+                value1 = parseInt(possiblePairs[l][0][1]) //get the value from the string
+                value2 = parseInt(possiblePairs[l][0][3])
+                const [I1,J1] = possiblePairs[l][1]
+                const [I2,J2] = possiblePairs[k][1]
+                eliminatePossibility(value1,I1,J1,board,type)
+                eliminatePossibility(value2,I1,J1,board,type)
+                eliminatePossibility(value1,I2,J2,board,type)
+                eliminatePossibility(value2,I2,J2,board,type)
+            }
+        }
 
+    }
+}
 function cellsPossibleValues(board,i,j) {
+    /**
+     * For a given row (i) and column (j) this function finds all of the numbers the cell [i,j] cannot be
+     * due to the numbers existing on the respective row, column and box
+     */
     const allInvalidValues = [...getBox(board,i,j),...getColumn(board,j),...getRow(board,i)]
     const invalidValues = Array.from(new Set(removeEmpties(allInvalidValues)))
     const possibleValues = [1,2,3,4,5,6,7,8,9]
     invalidValues.forEach(value=> {
-        if (possibleValues.includes(value)) {
+        if (possibleValues.includes(value)) {  
             possibleValues.splice(possibleValues.indexOf(value),1)
         }
     })
-
+    if (possibleValues.length===1) {
+        return possibleValues[0]
+    }
+    else {
+        const doubleRows = doub
+    }
     return (possibleValues.length===1?possibleValues[0]:possibleValues)
 }   
 
-function eliminatePossibility(value,i,j,board) {
-    coords = Array.from(new Set([...getColumnCoordinates(j),...getBoxCoordinates(i,j),...getRowCoordinates(i)]))
+function eliminatePossibility(value,i,j,board,type) {
+    let coords
     let cellValue
+    if (type==='all') {
+        coords = Array.from(new Set([...getColumnCoordinates(j),...getBoxCoordinates(i,j),...getRowCoordinates(i)]))
+    }
+    else {
+        coords = findAllEmptyCells(board,type)
+    }
     coords.forEach(coord=> {
         cellValue = board[coord[0]][coord[1]]
-        //console.log(`Possible values at ${coord[0]},${coord[1]} are ${cellValue}`)
-        if (typeof cellValue==='object' && cellValue.indexOf(value)!==-1) {
-
+        if (typeof cellValue==='object' && cellValue.indexOf(value)!==-1 && !(i===coord[0]&& j===coord[1])) {
             board[coord[0]][coord[1]].splice(cellValue.indexOf(value),1)
             //console.log(`Possibility of ${value} removed at ${coord[0]+1},${coord[1]+1}`)
         }
@@ -76,16 +110,20 @@ function obviousSingles(board,i,j,type) {
     possibleValues.forEach((possibles,crdCounter)=> {
         possibles.forEach(possible=> {
             `${possible}` in valueCounter? valueCounter[`${possible}`][0]++:valueCounter[`${possible}`]=[1,coordinates[crdCounter]]
+            //console.log(valueCounter)
         })
     })
     const singularCells = Object.keys(valueCounter).reduce((acc,key)=> {
         if (valueCounter[key][0]===1 ){
             acc.push([parseInt(key),valueCounter[key][1]])
         }
+
         return acc
     },[])
     return singularCells
 }
+
+
 
 function findEmptyCellCoordinates(board,i,j,type) {
     if (type==='row') {
@@ -120,12 +158,14 @@ function sudokuSolver(board) {
     let I,J
     while (unsolved) {
         emptyCellIndexes = findAllEmptyCells(board)
-        for (let emptyCell of emptyCellIndexes) {
-            const [i,j] = emptyCell
-
+        for (let [i,j] of emptyCellIndexes) {
+            /** Now need to check for obvious doubles. 
+             * We set the board[i][j] value to the possible values it can be, by looking at what is in the row/col/box of the cell
+             * We can't alter cellsPossibleValues to include this, as the possible values aren't necessarily completed yet in the row/col/box.
+             */
             board[i][j]=cellsPossibleValues(board,i,j)
             if (typeof board[i][j]==='number') {
-                eliminatePossibility(board[i][j],i,j,board)
+                eliminatePossibility(board[i][j],i,j,board,'all')
             }
         }
         for (let k=0;k<9;k++) {
@@ -137,7 +177,7 @@ function sudokuSolver(board) {
             for (let [value,[crdI,crdJ]] of [...rowSols,...colSols,...boxSols]) {
                 if (typeof board[crdI][crdJ]!=='number') {
                     board[crdI][crdJ]=value
-                    eliminatePossibility(value,crdI,crdJ,board)
+                    eliminatePossibility(value,crdI,crdJ,board,'all')
                 }
             }
         }
@@ -145,6 +185,10 @@ function sudokuSolver(board) {
             console.log(`dT = ${new Date() - startTime}`)
             unsolved=false
         }
+        // for (row of board) {
+        //     console.log(row)
+        // }
+        // console.log('------------')
     }
     return board
 

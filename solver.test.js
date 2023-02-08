@@ -1,7 +1,7 @@
-const {cellsPossibleValues, eliminatePossibility,obviousSingles,sudokuSolver} = require('./solver.js')
+const {cellsPossibleValues, eliminatePossibility,obviousSingles,sudokuSolver,obviousDoubles} = require('./solver.js')
 const cpv = cellsPossibleValues
 const eP = eliminatePossibility
-const obS = obviousSingles
+const obS = obviousSingles 
 const solve = sudokuSolver
 const medium = [[1,5,0,0,9,0,0,0,2],
                 [0,0,0,2,1,0,7,4,0],
@@ -49,4 +49,8 @@ test('Solution is found for medium and is correct',()=> {
 
 test('Possibilities on rows/cols/boxes eliminated',()=> {
 
+})
+
+test('Obvious doubles changes the board',()=> {
+    board = [[[6,7,9],8,5],[7,9],3,[4,7,9],2,1,[7,9]]
 })
