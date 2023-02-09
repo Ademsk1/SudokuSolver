@@ -76,48 +76,48 @@ function cellsPossibleValues(board,i,j) {
             possibleValues.splice(possibleValues.indexOf(value),1)
         }
     })
-    if (possibleValues.length===1) {
-        return possibleValues[0]
-    }
-    else {
-        const doubleRows = doub
-    }
     return (possibleValues.length===1?possibleValues[0]:possibleValues)
 }   
 
 function eliminatePossibility(value,i,j,board,type) {
     let coords
     let cellValue
-    if (type==='all') {
-        coords = Array.from(new Set([...getColumnCoordinates(j),...getBoxCoordinates(i,j),...getRowCoordinates(i)]))
-    }
-    else {
-        coords = findAllEmptyCells(board,type)
-    }
+    coords = findEmptyCellCoordinates(board,i,j,type)
     coords.forEach(coord=> {
         cellValue = board[coord[0]][coord[1]]
         if (typeof cellValue==='object' && cellValue.indexOf(value)!==-1 && !(i===coord[0]&& j===coord[1])) {
             board[coord[0]][coord[1]].splice(cellValue.indexOf(value),1)
-            //console.log(`Possibility of ${value} removed at ${coord[0]+1},${coord[1]+1}`)
         }
     })
+}
+
+function singleValuedCells(board) {
+
+    coordinates = findAllEmptyCells(board) //all coordinates of the board
+    const possibleValues = coordinates.map(crd=> board[crd[0]][crd[1]])
+    const singles = possibleValues.map((p,indx)=> [p,coordinates[indx]]).filter(el=>el[0].length===1)
+    singles.forEach(el => {
+        const [value,[I,J]] = el
+        board[I][J] = value
+        eliminatePossibility(value,I,J,board,'all')
+        })
 }
 
 function obviousSingles(board,i,j,type) {
     const coordinates = findEmptyCellCoordinates(board,i,j,type)
     const possibleValues = coordinates.map(crd=> board[crd[0]][crd[1]])
+    const singles = possibleValues.map((p,indx)=> [p,coordinates[indx]]).filter(el=>el[0].length===1)
     const valueCounter = {}
     possibleValues.forEach((possibles,crdCounter)=> {
         possibles.forEach(possible=> {
             `${possible}` in valueCounter? valueCounter[`${possible}`][0]++:valueCounter[`${possible}`]=[1,coordinates[crdCounter]]
-            //console.log(valueCounter)
+
         })
     })
     const singularCells = Object.keys(valueCounter).reduce((acc,key)=> {
-        if (valueCounter[key][0]===1 ){
+        if (valueCounter[key][0]===1){
             acc.push([parseInt(key),valueCounter[key][1]])
         }
-
         return acc
     },[])
     return singularCells
@@ -126,6 +126,12 @@ function obviousSingles(board,i,j,type) {
 
 
 function findEmptyCellCoordinates(board,i,j,type) {
+    if (type==='all') {
+        const rowCords = getRowCoordinates(i).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+        const boxCords = getBoxCoordinates(i,j).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+        const colCords = getColumnCoordinates(j).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
+        return Array.from(new Set([...rowCords,...boxCords,...colCords]))
+    }
     if (type==='row') {
         return getRowCoordinates(i).filter(crd=> typeof board[crd[0]][crd[1]]==='object')
     }
@@ -156,18 +162,17 @@ function sudokuSolver(board) {
     let emptyCellIndexes
     let unsolved = true
     let I,J
+    emptyCellIndexes = findAllEmptyCells(board)
+    for (let [i,j] of emptyCellIndexes) {
+        board[i][j]=cellsPossibleValues(board,i,j)
+        if (typeof board[i][j]==='number') {
+            eliminatePossibility(board[i][j],i,j,board,'all')
+        }
+    }
+    
     while (unsolved) {
         emptyCellIndexes = findAllEmptyCells(board)
-        for (let [i,j] of emptyCellIndexes) {
-            /** Now need to check for obvious doubles. 
-             * We set the board[i][j] value to the possible values it can be, by looking at what is in the row/col/box of the cell
-             * We can't alter cellsPossibleValues to include this, as the possible values aren't necessarily completed yet in the row/col/box.
-             */
-            board[i][j]=cellsPossibleValues(board,i,j)
-            if (typeof board[i][j]==='number') {
-                eliminatePossibility(board[i][j],i,j,board,'all')
-            }
-        }
+        singleValuedCells(board)
         for (let k=0;k<9;k++) {
             I = Math.floor(k/3)*3
             J = (k % 3)*3
@@ -185,10 +190,6 @@ function sudokuSolver(board) {
             console.log(`dT = ${new Date() - startTime}`)
             unsolved=false
         }
-        // for (row of board) {
-        //     console.log(row)
-        // }
-        // console.log('------------')
     }
     return board
 
